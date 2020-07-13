@@ -1,3 +1,105 @@
+$(document).ready(function() {
+  // add interactivity
+  $(".curriculum-class-details").hide();
+  $(".curriculum-class-heading").click(function() {
+    $(this).toggleClass("open");
+    $(this).next().slideToggle(200);
+  });
+  $(".program-finder-filter-group-heading").click(function() {
+    $(this).next().slideToggle(200);
+    $(this).toggleClass("closed");
+  });
+  $(".jump-to-link-wrap").click(function() {
+    $(".on-page-anchor-links").slideToggle();
+    $(".jump-to-link-wrap .jump-to-link").toggleClass("open");
+    $(".on-page-anchor-links a").click(function() {
+      $(".jump-to-link-wrap .jump-to-link").toggleClass("open");
+      $(".on-page-anchor-links").slideUp(200);
+    });
+    return false;
+  });
+  $('.grid-item-button').slideUp();
+  $('.grid-item').hover(function() {
+    $(this).find('.grid-item-button').slideDown(200);
+  }, function() {
+    $(this).find('.grid-item-button').slideUp(200);
+  });
+  // balance headlines
+  balanceText($('h1, h2, h3, h4, h5, .lede, .button'), {
+    watch: true
+  });
+  function doFiltering() {
+    var activeFilterCount = $('.program-finder-filter-group input[type=checkbox]:checked:not([data-filter=all])').length;
+    $('.program-finder-table .subject-grouping').show();
+    $('.program-finder-table .subject-grouping .row').show();
+    // does any group have no filters checked? check all instead
+    $('.program-finder-filter-group').not(':has(.filter-checkbox:checked:not([data-filter=all]))').each(function() {
+      $(this).find('.filter-checkbox[data-filter=all]').prop('checked', true);
+    });
+    if (activeFilterCount == 0) {
+      $('.program-finder-active-filters').hide();
+      $('.program-finder-active-filter').remove();
+      $('.clear-filters-link').hide();
+      $('.program-finder-number-of-results').text('');
+      $('.program-finder-table .subject-grouping .row').show();
+      $('.program-finder-table .subject-grouping').show();
+    } else {
+      $('.program-finder-active-filters').show();
+      $('.program-finder-active-filter').remove();
+      $('.program-finder-filter-group').has('.filter-checkbox:checked:not([data-filter=all])').each(function() {
+        var theseFilters = [];
+        $(this).find('.filter-checkbox:checked:not([data-filter=all])').each(function() {
+          theseFilters.push('[data-filter*=' + $(this).data('filter') + ']');
+          var thisFilterLabel = $(this).parent().text().trim();
+          var thisFilterFilter = $(this).data('filter');
+          $('.program-finder-active-filters').append("<div class='program-finder-active-filter' data-filter='" + thisFilterFilter + "'>" + thisFilterLabel + "</div>");
+        });
+        var theseFiltersString = theseFilters.toString();
+        $('.program-finder-table .subject-grouping .row').not(theseFiltersString).hide();
+      });
+      $('.clear-filters-link').show();
+      var visibleProgramsCount = $('.program-finder .subject-grouping .row:visible').length;
+      $('.program-finder-number-of-results').text(visibleProgramsCount + " results");
+      // hide headers for empty sections
+      $('.subject-grouping').each(function() {
+        if ($(this).find('.row:visible').length < 1) {
+          $(this).hide();
+        } else {
+          $(this).show();
+        }
+      });
+    }
+  }
+  doFiltering();
+  $('.program-finder input').change(function() {
+    doFiltering();
+  });
+  $('.clear-filters-link').click(function() {
+    $('.program-finder-filter-group .filter-checkbox').prop('checked', false);
+    $('.program-finder-filter-group .filter-checkbox[data-filter=all]').prop('checked', true);
+    doFiltering();
+    return false;
+  });
+  $('.program-finder .filter-checkbox:not([data-filter=all])').change(function() {
+    if ($(this).prop('checked') == true) {
+      $(this).closest('.program-finder-filter-group').find('.filter-checkbox[data-filter=all]').prop('checked', false);
+    } else {}
+  });
+  $(document).on("click", ".program-finder-active-filter", function() {
+    var thisFilter = $(this).data('filter');
+    console.log(thisFilter);
+    $('.program-finder-filter-group .filter-checkbox[data-filter=' + thisFilter + ']').prop('checked', false);
+    $(this).remove();
+    doFiltering();
+  });
+  $('.program-finder .filter-checkbox[data-filter=all]').change(function() {
+    if ($(this).prop('checked') == true) {
+      $(this).closest('.program-finder-filter-group').find('.filter-checkbox:not([data-filter=all])').prop('checked', false);
+    } else {}
+    doFiltering();
+  });
+});
+
 /*!
  * Webflow: Front-end site library
  * @license MIT
@@ -12851,7 +12953,7 @@ module.exports = _interopRequireDefault;
  * LICENSE file in the root directory of this source tree.
  *
  * @typechecks
- * 
+ *
  */
 
 /*eslint-disable no-self-compare */
